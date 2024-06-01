@@ -1,3 +1,5 @@
+package _6_linkedlist
+
 /**
  * Definition for singly-linked list.
  * type ListNode struct {
