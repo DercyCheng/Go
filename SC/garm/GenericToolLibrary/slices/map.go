@@ -1,4 +1,4 @@
-package slice
+package slices
 
 /**
  * Map 对切片中的每个元素应用一个函数，并返回一个包含结果的新切片

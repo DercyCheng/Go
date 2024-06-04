@@ -1,4 +1,4 @@
-package slice
+package slices
 
 // Reduce 对切片中的每个元素应用函数，累计结果并返回
 // 参数:

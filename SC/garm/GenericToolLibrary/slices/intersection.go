@@ -1,4 +1,4 @@
-package slice
+package slices
 
 /**
  * Intersection 返回两个切片的交集

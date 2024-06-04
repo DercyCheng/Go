@@ -1,4 +1,4 @@
-package slice
+package slices
 
 // Add 向切片中添加一个元素，并返回新的切片
 // 参数:

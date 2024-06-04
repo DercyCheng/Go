@@ -1,4 +1,4 @@
-package slice
+package slices
 
 // Contains 检查切片中是否包含指定的元素
 // 参数:

@@ -1,4 +1,4 @@
-package slice
+package slices
 
 // Remove 从切片中移除第一个匹配的元素，并返回新的切片
 // 参数:

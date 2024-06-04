@@ -1,4 +1,4 @@
-package slice
+package slices
 
 /**
  * Union 返回两个切片的并集
