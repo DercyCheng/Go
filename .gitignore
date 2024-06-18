@@ -34,3 +34,4 @@ pkg/
 .git/
 Pro/
 geektime-basic-go/
+*-fe/
