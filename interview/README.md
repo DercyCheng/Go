@@ -109,6 +109,6 @@ slice = append(slice, 3)     // 容量扩展为4
 
 这样，切片可以动态地适应所需的容量，而无需手动调整。
 
-# GORM
+# GORMx
 
 ![Alt text](./image/README/image.png)
