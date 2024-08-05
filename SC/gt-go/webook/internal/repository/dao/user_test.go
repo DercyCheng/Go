@@ -51,7 +51,7 @@ func TestGORMUserDAO_Insert(t *testing.T) {
 			user: User{
 				Nickname: "Tom",
 			},
-			wantErr: ErrDuplicateEmail,
+			wantErr: ErrUserDuplicate,
 		},
 		{
 			name: "数据库错误",

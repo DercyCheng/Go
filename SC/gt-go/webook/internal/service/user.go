@@ -9,22 +9,35 @@ import (
 )
 
 var (
-	ErrDuplicateEmail        = repository.ErrDuplicateUser
+	ErrDuplicateEmail        = repository.ErrUserDuplicate
 	ErrInvalidUserOrPassword = errors.New("用户不存在或者密码不对")
 )
 
 type UserService interface {
 	Signup(ctx context.Context, u domain.User) error
 	Login(ctx context.Context, email string, password string) (domain.User, error)
-	UpdateNonSensitiveInfo(ctx context.Context,
-		user domain.User) error
+	//UpdateNonSensitiveInfo(ctx context.Context, user domain.User) error
 	FindById(ctx context.Context,
 		uid int64) (domain.User, error)
 	FindOrCreate(ctx context.Context, phone string) (domain.User, error)
+	FindOrCreateByWechat(ctx context.Context, wechatInfo domain.WechatInfo) (domain.User, error)
 }
 
 type userService struct {
 	repo repository.UserRepository
+}
+
+func (svc *userService) FindOrCreateByWechat(ctx context.Context, wechatInfo domain.WechatInfo) (domain.User, error) {
+	user, err := svc.repo.FindByWechat(ctx, wechatInfo.OpenId)
+	if err != repository.ErrUserNotFound {
+		return user, err
+	}
+	user = domain.User{WechatInfo: wechatInfo}
+	err = svc.repo.Create(ctx, user)
+	if err != nil && err != repository.ErrUserDuplicate {
+		return user, err
+	}
+	return svc.repo.FindByWechat(ctx, wechatInfo.OpenId)
 }
 
 func NewUserService(repo repository.UserRepository) UserService {
@@ -58,11 +71,11 @@ func (svc *userService) Login(ctx context.Context, email string, password string
 	return u, nil
 }
 
-func (svc *userService) UpdateNonSensitiveInfo(ctx context.Context,
-	user domain.User) error {
-	// UpdateNicknameAndXXAnd
-	return svc.repo.UpdateNonZeroFields(ctx, user)
-}
+//func (svc *userService) UpdateNonSensitiveInfo(ctx context.Context,
+//	user domain.User) error {
+//	// UpdateNicknameAndXXAnd
+//	return svc.repo.UpdateNonZeroFields(ctx, user)
+//}
 
 func (svc *userService) FindById(ctx context.Context,
 	uid int64) (domain.User, error) {
@@ -84,7 +97,7 @@ func (svc *userService) FindOrCreate(ctx context.Context, phone string) (domain.
 	})
 	// 有两种可能，一种是 err 恰好是唯一索引冲突（phone）
 	// 一种是 err != nil，系统错误
-	if err != nil && err != repository.ErrDuplicateUser {
+	if err != nil && err != repository.ErrUserDuplicate {
 		return domain.User{}, err
 	}
 	// 要么 err ==nil，要么ErrDuplicateUser，也代表用户存在

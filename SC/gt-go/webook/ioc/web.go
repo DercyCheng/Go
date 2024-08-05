@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-//func InitWebServerV1(mdls []gin.HandlerFunc, hdls []web.Handler) *gin.Engine {
+//func InitWebServerV1(mdls []gin.HandlerFunc, hdls []web.handler) *gin.Engine {
 //	server := gin.Default()
 //	server.Use(mdls...)
 //	for _, hdl := range hdls {

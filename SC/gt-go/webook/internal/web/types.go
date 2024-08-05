@@ -2,6 +2,6 @@ package web
 
 import "github.com/gin-gonic/gin"
 
-type Handler interface {
+type handler interface {
 	RegisterRoutes(server *gin.Engine)
 }

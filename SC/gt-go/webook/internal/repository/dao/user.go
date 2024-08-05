@@ -10,16 +10,17 @@ import (
 )
 
 var (
-	ErrDuplicateEmail = errors.New("邮箱冲突")
+	ErrUserDuplicate  = errors.New("冲突")
 	ErrRecordNotFound = gorm.ErrRecordNotFound
 )
 
 type UserDAO interface {
 	Insert(ctx context.Context, u User) error
 	FindByEmail(ctx context.Context, email string) (User, error)
-	UpdateById(ctx context.Context, entity User) error
+	//UpdateById(ctx context.Context, entity User) error
 	FindById(ctx context.Context, uid int64) (User, error)
 	FindByPhone(ctx context.Context, phone string) (User, error)
+	FindByWechat(ctx context.Context, OpenId string) (User, error)
 }
 
 type GORMUserDAO struct {
@@ -41,7 +42,7 @@ func (dao *GORMUserDAO) Insert(ctx context.Context, u User) error {
 		const duplicateErr uint16 = 1062
 		if me.Number == duplicateErr {
 			// 用户冲突，邮箱冲突
-			return ErrDuplicateEmail
+			return ErrUserDuplicate
 		}
 	}
 	return err
@@ -53,19 +54,19 @@ func (dao *GORMUserDAO) FindByEmail(ctx context.Context, email string) (User, er
 	return u, err
 }
 
-func (dao *GORMUserDAO) UpdateById(ctx context.Context, entity User) error {
-
-	// 这种写法依赖于 GORM 的零值和主键更新特性
-	// Update 非零值 WHERE id = ?
-	//return dao.db.WithContext(ctx).Updates(&entity).Error
-	return dao.db.WithContext(ctx).Model(&entity).Where("id = ?", entity.Id).
-		Updates(map[string]any{
-			"utime":    time.Now().UnixMilli(),
-			"nickname": entity.Nickname,
-			"birthday": entity.Birthday,
-			"about_me": entity.AboutMe,
-		}).Error
-}
+//func (dao *GORMUserDAO) UpdateById(ctx context.Context, entity User) error {
+//
+//	// 这种写法依赖于 GORM 的零值和主键更新特性
+//	// Update 非零值 WHERE id = ?
+//	//return dao.db.WithContext(ctx).Updates(&entity).Error
+//	return dao.db.WithContext(ctx).Model(&entity).Where("id = ?", entity.Id).
+//		Updates(map[string]any{
+//			"utime":    time.Now().UnixMilli(),
+//			"nickname": entity.Nickname,
+//			"birthday": entity.Birthday,
+//			"about_me": entity.AboutMe,
+//		}).Error
+//}
 
 func (dao *GORMUserDAO) FindById(ctx context.Context, uid int64) (User, error) {
 	var res User
@@ -79,6 +80,12 @@ func (dao *GORMUserDAO) FindByPhone(ctx context.Context, phone string) (User, er
 	return res, err
 }
 
+func (dao *GORMUserDAO) FindByWechat(ctx context.Context, OpenId string) (User, error) {
+	var res User
+	err := dao.db.WithContext(ctx).Where("wechat_open_id = ?", OpenId).First(&res).Error
+	return res, err
+}
+
 type User struct {
 	Id int64 `gorm:"primaryKey,autoIncrement"`
 	// 代表这是一个可以为 NULL 的列
@@ -86,10 +93,10 @@ type User struct {
 	Email    sql.NullString `gorm:"unique"`
 	Password string
 
-	Nickname string `gorm:"type=varchar(128)"`
-	// YYYY-MM-DD
-	Birthday int64
-	AboutMe  string `gorm:"type=varchar(4096)"`
+	//Nickname string `gorm:"type=varchar(128)"`
+	//// YYYY-MM-DD
+	//Birthday int64
+	//AboutMe  string `gorm:"type=varchar(4096)"`
 
 	// 代表这是一个可以为 NULL 的列
 	Phone sql.NullString `gorm:"unique"`
@@ -102,6 +109,10 @@ type User struct {
 
 	// json 存储
 	//Addr string
+
+	//微信
+	WechatUnionID sql.NullString
+	WechatOpenID  sql.NullString `gorm:"unique"`
 }
 
 //type Address struct {
